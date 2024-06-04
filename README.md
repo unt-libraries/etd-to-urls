@@ -43,7 +43,7 @@ flat directory.
 
 example:
 
-    $ python3 experiment-06-poppler/lauren/pdf_link_extractor.py data/2023-May/*/*.pdf -o output > 2023-May.log
+    $ python3 pdf_link_extractor.py data/2024-May/*/*.pdf -n -o 2024-May
 
 ```
 usage: pdf_link_extractor.py [-h] [-o OUTPUT_DIR] [-n] [-s] input [input ...]
@@ -70,7 +70,7 @@ crawl for each in docker. Once you have docker installed, pull down browsertrix-
 you can run the crawls.
 
     $ docker pull webrecorder/browsertrix-crawler
-    $ etd-to-urls/browsertrix-crawl.sh >> browsertrix-crawl_20230703.log
+    $ ./browsertrix-crawl.sh 2024-May/*/*.pdf.urls > browsertrix-crawl_20240604.log
 
 Testing
 -------
