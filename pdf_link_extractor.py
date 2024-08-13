@@ -50,8 +50,9 @@ BAD_DOI_MATCHER = re.compile(r'^(https?://doi:|doi:\s*(https?://doi\.org/)?)', f
 
 PAGE_NUM_MATCHER = re.compile(r'^\s+\d+\s*$')
 
-# Pattern to guess at an author (possibly hyphenated) beginning a new citation
-AUTHOR_MATCHER = re.compile(r'^[A-Z][a-z]+(-[A-Z][a-z]+)?, ')
+# Pattern to guess at a personal author (possibly hyphenated or having two capital
+# letters like MacDonald) beginning a new citation.
+AUTHOR_MATCHER = re.compile(r'^[^\W0-9_a-z][^\W0-9_A-Z]+(-?[^\W0-9_a-z][^\W0-9_A-Z]+)?, ')
 
 # Check for possible file extension at end of URL.
 FILE_EXTENSION_MATCHER = re.compile(r'//[^/]*/.*(\.[a-z]{2,})$')
