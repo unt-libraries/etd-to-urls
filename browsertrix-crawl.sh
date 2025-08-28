@@ -16,7 +16,9 @@ for datafile in $@; do
     rootname="${pdfname%.*}"
     # Set a name for the collection used by Browsertrix Crawler.
     collectionname="${submission}_${rootname}"
+    # Replace any spaces with underscore.
+    collectionname="${collectionname// /_}"
     echo "Processing $filename to $collectionname"
-    docker run -v "$datafile":/app/seedFile.txt -v $PWD/crawls:/crawls/ webrecorder/browsertrix-crawler crawl --seedFile /app/seedFile.txt --generateWACZ --scopeType  page --generateCDX --screenshot thumbnail,fullPage --screencastPort 8061 -diskUtilization 95 --description "Data served from URLs parsed from ETD $pdfname" --warcinfo.operator "University of North Texas Libraries" --collection "$collectionname" --userAgent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.3" --delay 3
+    docker run -v "$datafile":/app/seedFile.txt -v $PWD/crawls:/crawls/ webrecorder/browsertrix-crawler crawl --seedFile /app/seedFile.txt --generateWACZ --scopeType page --generateCDX --screenshot thumbnail,fullPage --screencastPort 8061 -diskUtilization 95 --description "Data served from URLs parsed from ETD $pdfname" --warcinfo.operator "University of North Texas Libraries" --collection "$collectionname" --delay 6 --warcPrefix "UNT" --workers=2
     cp "$datafile" "$PWD/crawls/collections/$collectionname/"
 done
