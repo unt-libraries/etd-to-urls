@@ -32,7 +32,11 @@ Setup
 - Install [libpoppler](https://poppler.freedesktop.org/) and make sure it is on your system path
 (if you don't install from package manager).
 - Install the Python libraries [python-poppler](https://cbrunet.net/python-poppler/) and requests
-with pip.
+with pip:
+
+```bash
+pip install -r requirements.txt
+```
 
 Usage
 -----
@@ -76,4 +80,7 @@ Testing
 -------
 To run included tests, install pytest and from the root of this repo run:
 
-    $ pytest ./test_pdf_link_extractor.py
+```bash
+pip install -r requirements-test.txt
+pytest ./test_pdf_link_extractor.py
+```
