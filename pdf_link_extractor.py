@@ -237,7 +237,8 @@ class URLParser():
         else:
             for url_variations in self.speculative_urls:
                 self.urls.extend(url_variations)
-        self.urls = list(set(self.urls))
+        # Legitimate URLs will contain a dot.
+        self.urls = [u for u in set(self.urls) if '.' in u]
 
     def check_line(self, line):
         """Check the line for URLs, either continuing a multiline URL or not."""
@@ -381,7 +382,7 @@ def main():
     if args.no_validate:
         validate = False
 
-    SUBMISSION_MATCHER = re.compile(r'(submission_[^/]+/[^/]+\.pdf)',
+    SUBMISSION_MATCHER = re.compile(r'(submission[^/]+/[^/]+\.pdf)',
                                     flags=re.I)
 
     for path in args.input:
