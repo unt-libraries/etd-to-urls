@@ -284,7 +284,7 @@ class URLParser():
                 # put this one in speculative_urls, in case it is the full URL.
                 if not line_urls[-1].endswith('.') and not SCHEME_MATCHER.fullmatch(line_urls[-1]):
                     self.speculative_urls.append([preen_url(line_urls[-1])])
-                elif SCHEME_MATCHER.fullmatch(line_urls[-1]):
+                elif SCHEME_MATCHER.fullmatch(line_urls[-1]) or line_urls[-1] == 'www.':
                     # The first line of the URL only has the scheme, so create a list
                     # to place speculative URLs, but don't add the scheme-only string.
                     self.speculative_urls.append([])
