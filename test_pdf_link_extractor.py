@@ -329,6 +329,20 @@ def test_URLParser_first_line_of_multiline_ends_in_dot(m_head):
     m_head.assert_has_calls(calls)
 
 
+def test_URLParser_first_line_of_multiline_ends_in_dot_full_stop():
+    # Verify we try the case where the dot is a full stop in citation
+    # section.
+    url_parser = ple.URLParser(
+        'vol. 28, no. S1, pp. 1648–1649, Aug. 2022, doi: 10.1017/S1431927622006560.\n'
+        '\n'
+        '[40]   P. Cavaliere, "Hydrogen Embrittlement: Damage Mechanisms," in Hydrogen\n'
+        '\n'
+        '       Embrittlement in Metals and Alloys, Cham: Springer Nature Switzerland, 2025',
+        validate_urls=False
+    )
+    assert set(url_parser.urls) == set(['https://doi.org/10.1017/S1431927622006560'])
+
+
 @patch('pdf_link_extractor.requests.head')
 def test_URLParser_first_line_of_multiline_ends_in_first_dot_of_url(m_head):
     # Verify we don't try the URL before we get to atleast one dot because

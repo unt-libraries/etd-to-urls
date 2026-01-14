@@ -265,7 +265,7 @@ class URLParser():
                 # on its first line. The dot could be part of an URL split by a line break.
                 # Since our regex assumed it was a full stop and didn't include it in the URL, add
                 # it back.
-                if '.' in line_urls[-1]:
+                if '.' in line_urls[-1].replace('//www.', '//'):
                     # This could be a multiline URL, but it may just be an URL then a full stop.
                     # Add the URL without the line ending dot to speculative URLs,
                     # then check it further with the dot.
@@ -335,6 +335,9 @@ class URLParser():
                 # we came to the end of where the URL might extend, so
                 # reset things and check the line further for other URLs.
                 self.reset_multiline(line)
+        elif line:
+            # This is not a continuation of the URL or document line spacing, reset.
+            self.reset_multiline(line)
 
     def reset_multiline(self, line):
         """Reset multiline related variables and re-check line.
