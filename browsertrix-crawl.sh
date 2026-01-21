@@ -3,7 +3,7 @@
 
 # Pass argument of list of .urls files via commandline, such as
 # 2023-December/*/*.pdf.urls
-for datafile in $@; do
+for datafile in "$@"; do
     # Get absolute path of seed file.
     datafile=$(realpath "$datafile")
     # Get just the seed file name.
