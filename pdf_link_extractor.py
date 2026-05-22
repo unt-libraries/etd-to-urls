@@ -18,6 +18,7 @@ warnings.simplefilter('ignore', requests.packages.urllib3.exceptions.InsecureReq
 
 # Build a list of common file extensions on the web.
 more_extensions = ['.ashx', '.asp', '.aspx', '.cfm', '.jsp', '.php', '.xlsx']
+
 EXTENSIONS = list(mimetypes.types_map) + list(mimetypes.common_types) + more_extensions
 
 DOI_SITE = 'https://doi.org/'  # convert DOIs by replacing doi: with this
@@ -65,7 +66,7 @@ AUTHOR_MATCHER = re.compile(r"""
 """, re.X)
 
 # Check for possible file extension at end of URL.
-FILE_EXTENSION_MATCHER = re.compile(r'//[^/]*/.*(\.[a-z]{2,})$')
+FILE_EXT_MATCHER = re.compile(r'//[^/]*/.*(\.[a-z]{2,})$')
 
 # Match query string or hash at beginning of line, allowing spaces
 QUERY_OR_ANCHOR_MATCHER = re.compile(r'^\s*[?#].*')
@@ -315,12 +316,12 @@ class URLParser():
             # finding the URL, and process it normally.
             self.reset_multiline(line)
             return
-        elif FILE_EXTENSION_MATCHER.search(self.multiline_url):
+        elif FILE_EXT_MATCHER.search(self.multiline_url.rstrip('.')):
             # If there was a file extension ending the previous line
             # that indicates we probably found the URL's end there,
             # unless a ? or # beginning the next line could indicate a URL
             # still going, assume we are not in a multiline URL.
-            if FILE_EXTENSION_MATCHER.search(self.multiline_url).group(1) in EXTENSIONS:
+            if FILE_EXT_MATCHER.search(self.multiline_url.rstrip('.')).group(1) in EXTENSIONS:
                 if not QUERY_OR_ANCHOR_MATCHER.match(line):
                     # We matched a file extension and it looks like the
                     # current line isn't adding a query string or anchor,
