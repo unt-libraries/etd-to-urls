@@ -242,6 +242,46 @@ def test_preen_url_doi_bad():
     assert preened_url == 'https://doi.org/10.1016/S0020-7462(02)00027-6'
 
 
+def test_add_best_url_first_speculative_url():
+    speculative_urls = []
+    ple.add_best_url(speculative_urls, 'http://example.com')
+    assert speculative_urls == ['http://example.com']
+
+
+def test_add_best_url_new_url_not_substring_of_previous_url():
+    speculative_urls = ['http://unt.edu']
+    ple.add_best_url(speculative_urls, 'http://example.com')
+    assert speculative_urls == ['http://unt.edu']
+
+
+def test_add_best_url_capitalized_word_match_previous_dash():
+    speculative_urls = ['http://example.com/Some-']
+    ple.add_best_url(speculative_urls, 'http://example.com/Some-Title')
+    assert speculative_urls == ['http://example.com/Some-',
+                                'http://example.com/Some-Title']
+
+
+def test_add_best_url_capitalized_word_match():
+    # Looks like the speculative URL has just added first word
+    # of a new sentence
+    speculative_urls = ['http://example.com/']
+    ple.add_best_url(speculative_urls, 'http://example.com/However')
+    assert speculative_urls == ['http://example.com/']
+
+
+def test_add_best_url_dash_slash_match():
+    speculative_urls = ['http://example.com/this-']
+    ple.add_best_url(speculative_urls, 'http://example.com/this-is-a-blog-post')
+    assert speculative_urls == ['http://example.com/this-is-a-blog-post']
+
+
+def test_add_best_url_undecided_so_keep_both():
+    speculative_urls = ['http://doi.org/10.1234/233']
+    ple.add_best_url(speculative_urls, 'http://doi.org/10.1234/233asp')
+    assert speculative_urls == ['http://doi.org/10.1234/233',
+                                'http://doi.org/10.1234/233asp']
+
+
 def test_URLParser_multiple_urls_on_single_line():
     url_parser = ple.URLParser(
         'Here is some text\n'
@@ -401,11 +441,11 @@ def test_URLParser_url_followed_by_scheme(m_head):
         'Apple, Green. Blah. https://google.com\n'
         'doi:10.1234/233432-x-P12\n'
         'http://something.com/all-in-\n'
-        'some-end (2000)'
+        'end (2000)'
     )
     assert set(url_parser.urls) == set(['https://google.com',
                                         'https://doi.org/10.1234/233432-x-P12',
-                                        'http://something.com/all-in-some-end'])
+                                        'http://something.com/all-in-end'])
     # Verify requests were only made for the something.com URL variations,
     # because the others weren't tested as multiline URLs.
     calls = [call('http://something.com/all-in-',
@@ -413,7 +453,7 @@ def test_URLParser_url_followed_by_scheme(m_head):
                   timeout=6,
                   allow_redirects=True,
                   verify=False),
-             call('http://something.com/all-in-some-end',
+             call('http://something.com/all-in-end',
                   headers={'User-Agent': ple.USER_AGENT},
                   timeout=6,
                   allow_redirects=True,

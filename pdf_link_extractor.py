@@ -71,6 +71,12 @@ FILE_EXT_MATCHER = re.compile(r'//[^/]*/.*(\.[a-z]{2,})$')
 # Match query string or hash at beginning of line, allowing spaces
 QUERY_OR_ANCHOR_MATCHER = re.compile(r'^\s*[?#].*')
 
+CAPITALIZED_WORD_MATCHER = re.compile(r'^[A-Z][a-z]+$')
+
+# Common URL continuation pattern of words split by dashes or slash
+# and optional query string or anchor hash.
+DASH_SLASH_MATCHER = re.compile(r'^[a-z]+-([a-z]+[-/])*[a-z]+/?([?#].*)?$')
+
 USER_AGENT = 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/113.0'
 
 
@@ -219,6 +225,37 @@ def preen_url(url):
     return url
 
 
+def add_best_url(speculative_urls, new_url):
+    """Try to limit false positive URLs via heuristics.
+
+    Compares the previous speculative version of a multiline URL with a
+    longer variant. If certain patterns appear, prefer one over the other.
+    If a preference isn't determined, keep both.
+    """
+    if not speculative_urls:
+        # Nothing to compare, new_url is best.
+        speculative_urls.append(new_url)
+        return None
+    previous_url = speculative_urls[-1]
+    if previous_url not in new_url:
+        # Shouldn't happen; new_url should be an extended version of previous_url.
+        return None
+    # Inspect what has been added to the multiline url.
+    url_diff = new_url[len(previous_url):]
+    if CAPITALIZED_WORD_MATCHER.search(url_diff):
+        # This is probably a new sentence, not the continuation of a multiline URL.
+        # Only include new_url in the speculative list if previous ends in dash.
+        if previous_url.endswith('-'):
+            speculative_urls.append(new_url)
+    elif DASH_SLASH_MATCHER.search(url_diff):
+        # Looks like the continuation of a multiline URL, replace shorter version
+        # of speculative URL with this.
+        speculative_urls[-1] = new_url
+    else:
+        # Keep both URLs, because we don't want to guess at the right one.
+        speculative_urls.append(new_url)
+
+
 class URLParser():
     """Attempt to find URLs, looking for those that cross line breaks.
 
@@ -340,9 +377,11 @@ class URLParser():
             # portion of a reference citation, and add to speculative_urls
             # to check.
             self.multiline_url += match.group(1)
-            self.speculative_urls[-1].append(preen_url(self.multiline_url))
-            if match.group(0) != line:
+            test_url = preen_url(self.multiline_url)
+            add_best_url(self.speculative_urls[-1], test_url)
+            if match.group(0) != line or test_url != self.speculative_urls[-1][-1]:
                 # If the full line doesn't match a continuing URL,
+                # or we decided this version of the URL isn't worth adding,
                 # we came to the end of where the URL might extend, so
                 # reset things and check the line further for other URLs.
                 self.reset_multiline(line)
