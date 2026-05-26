@@ -19,6 +19,6 @@ for datafile in "$@"; do
     # Replace any spaces with underscore.
     collectionname="${collectionname// /_}"
     echo "Processing $filename to $collectionname"
-    docker run -v "$datafile":/app/seedFile.txt -v $PWD/crawls:/crawls/ webrecorder/browsertrix-crawler crawl --seedFile /app/seedFile.txt --generateWACZ --scopeType page --generateCDX --screenshot thumbnail,fullPage --screencastPort 8061 -diskUtilization 95 --description "Data served from URLs parsed from ETD $pdfname" --warcinfo.operator "University of North Texas Libraries" --collection "$collectionname" --delay 6 --warcPrefix "UNT" --workers=2
+    docker run -p 8061:8061 -v "$datafile":/app/seedFile.txt -v $PWD/crawls:/crawls/ webrecorder/browsertrix-crawler crawl --seedFile /app/seedFile.txt --generateWACZ --scopeType page --generateCDX --screenshot thumbnail,fullPage --screencastPort 8061 -diskUtilization 95 --description "Data served from URLs parsed from ETD $pdfname" --warcinfo.operator "University of North Texas Libraries" --collection "$collectionname" --delay 6 --warcPrefix "UNT" --workers=2
     cp "$datafile" "$PWD/crawls/collections/$collectionname/"
 done
