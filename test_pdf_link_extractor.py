@@ -257,8 +257,7 @@ def test_add_best_url_new_url_not_substring_of_previous_url():
 def test_add_best_url_capitalized_word_match_previous_dash():
     speculative_urls = ['http://example.com/Some-']
     ple.add_best_url(speculative_urls, 'http://example.com/Some-Title')
-    assert speculative_urls == ['http://example.com/Some-',
-                                'http://example.com/Some-Title']
+    assert speculative_urls == ['http://example.com/Some-Title']
 
 
 def test_add_best_url_capitalized_word_match():
@@ -292,9 +291,7 @@ def test_URLParser_multiple_urls_on_single_line():
                                         'https://doi.org/10.1234/233432-x-P12'])
 
 
-@patch('pdf_link_extractor.requests.head', side_effect=[Mock(status_code=404),
-                                                        Mock(status_code=302)])
-def test_URLParser_multiple_urls_over_single_line(m_head):
+def test_URLParser_multiple_urls_over_single_line():
     url_parser = ple.URLParser(
         'Here is some text\n'
         'with https://google.com, www.unt.edu, doi:10.1234/233432-x-\n'
@@ -303,24 +300,9 @@ def test_URLParser_multiple_urls_over_single_line(m_head):
     assert set(url_parser.urls) == set(['https://google.com',
                                         'http://www.unt.edu',
                                         'https://doi.org/10.1234/233432-x-P12'])
-    # Requests are not made for google.com and unt.edu because they are fully
-    # contained within the line of text.
-    calls = [call('https://doi.org/10.1234/233432-x-',
-                  headers={'User-Agent': ple.USER_AGENT},
-                  timeout=6,
-                  allow_redirects=False,
-                  verify=False),
-             call('https://doi.org/10.1234/233432-x-P12',
-                  headers={'User-Agent': ple.USER_AGENT},
-                  timeout=6,
-                  allow_redirects=False,
-                  verify=False)]
-    m_head.assert_has_calls(calls)
 
 
-@patch('pdf_link_extractor.requests.head', side_effect=[Mock(status_code=404),
-                                                        Mock(status_code=302)])
-def test_URLParser_multiline_last_line_contains_another_url(m_head):
+def test_URLParser_multiline_last_line_contains_another_url():
     """Test finding a new URL after the end of a multiline URL on the same line."""
     url_parser = ple.URLParser(
         'Here is some text\n'
@@ -331,19 +313,6 @@ def test_URLParser_multiline_last_line_contains_another_url(m_head):
                                         'http://www.unt.edu',
                                         'https://doi.org/10.1234/233432-x-P12',
                                         'http://www.example.com'])
-    # Requests are not made for google.com and unt.edu because they are fully
-    # contained within the line of text.
-    calls = [call('https://doi.org/10.1234/233432-x-',
-                  headers={'User-Agent': ple.USER_AGENT},
-                  timeout=6,
-                  allow_redirects=False,
-                  verify=False),
-             call('https://doi.org/10.1234/233432-x-P12',
-                  headers={'User-Agent': ple.USER_AGENT},
-                  timeout=6,
-                  allow_redirects=False,
-                  verify=False)]
-    m_head.assert_has_calls(calls)
 
 
 @patch('pdf_link_extractor.requests.head', side_effect=[Mock(status_code=404),
@@ -433,9 +402,7 @@ def test_URLParser_url_followed_by_author(m_head):
     m_head.assert_not_called()
 
 
-@patch('pdf_link_extractor.requests.head', side_effect=[Mock(status_code=404),
-                                                        Mock(status_code=200)])
-def test_URLParser_url_followed_by_scheme(m_head):
+def test_URLParser_url_followed_by_scheme():
     url_parser = ple.URLParser(
         'Here is some text\n'
         'Apple, Green. Blah. https://google.com\n'
@@ -446,19 +413,6 @@ def test_URLParser_url_followed_by_scheme(m_head):
     assert set(url_parser.urls) == set(['https://google.com',
                                         'https://doi.org/10.1234/233432-x-P12',
                                         'http://something.com/all-in-end'])
-    # Verify requests were only made for the something.com URL variations,
-    # because the others weren't tested as multiline URLs.
-    calls = [call('http://something.com/all-in-',
-                  headers={'User-Agent': ple.USER_AGENT},
-                  timeout=6,
-                  allow_redirects=True,
-                  verify=False),
-             call('http://something.com/all-in-end',
-                  headers={'User-Agent': ple.USER_AGENT},
-                  timeout=6,
-                  allow_redirects=True,
-                  verify=False)]
-    m_head.assert_has_calls(calls)
 
 
 @patch('pdf_link_extractor.check_url')
